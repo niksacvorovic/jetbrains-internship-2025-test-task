@@ -12,30 +12,32 @@ class MarkdownEditor : JFrame(){
     private val scroll = JScrollPane(textArea)
     private val importButton = JButton("Import File")
     private val saveButton = JButton("Save Changes")
-    private val layout = GroupLayout(this.contentPane)
-    private var file: File? = null
+    private val layoutManager = GroupLayout(this.contentPane)
+    private lateinit var file: File
 
     init{
-        layout.setHorizontalGroup(layout.createSequentialGroup()
+        layoutManager.setHorizontalGroup(layoutManager.createSequentialGroup()
             .addComponent(scroll)
-            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+            .addGroup(layoutManager.createParallelGroup(GroupLayout.Alignment.LEADING)
                 .addComponent(importButton, 200, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                 .addComponent(saveButton, 200, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
 
-        layout.setVerticalGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+        layoutManager.setVerticalGroup(layoutManager.createParallelGroup(GroupLayout.Alignment.LEADING)
             .addComponent(scroll)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(layoutManager.createSequentialGroup()
                 .addComponent(importButton)
                 .addComponent(saveButton)))
 
         importButton.addActionListener {
             val fc = JFileChooser()
             fc.fileFilter = FileNameExtensionFilter("Markdown Files (*.md)", "md")
+            fc.isAcceptAllFileFilterUsed = false
             val result = fc.showOpenDialog(null)
 
             if(result == JFileChooser.APPROVE_OPTION){
                 file = fc.selectedFile
-                loadFile()
+                title = file.name + " [MarkdownEditor]"
+                textArea.text = file.readText()
                 importButton.isEnabled = false
                 saveButton.isEnabled = true
                 textArea.isEnabled = true
@@ -43,10 +45,12 @@ class MarkdownEditor : JFrame(){
         }
 
         saveButton.addActionListener {
-            saveFile()
+            file.writeText(textArea.text)
+            JOptionPane.showMessageDialog(null, "File successfully saved!")
+            title = "MarkdownEditor"
+            textArea.text = "(Markdown text will appear here)"
             importButton.isEnabled = true
             saveButton.isEnabled = false
-            textArea.text = "(Markdown text will appear here)"
             textArea.isEnabled = false
         }
 
@@ -54,10 +58,10 @@ class MarkdownEditor : JFrame(){
         textArea.isEnabled = false
         textArea.lineWrap = true
         saveButton.isEnabled = false
-        layout.autoCreateGaps = true
-        layout.autoCreateContainerGaps = true
+        layoutManager.autoCreateGaps = true
+        layoutManager.autoCreateContainerGaps = true
 
-        setLayout(layout)
+        layout = layoutManager
         title = "MarkdownEditor"
         defaultCloseOperation = EXIT_ON_CLOSE
         bounds = Rectangle(100, 100, 800, 500)
